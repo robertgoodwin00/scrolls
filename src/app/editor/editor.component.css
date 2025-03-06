@@ -1,0 +1,46 @@
+.formatting-buttons {
+    margin-bottom: 10px;
+  }
+  
+  .format-button {
+    margin-right: 5px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  
+  .color-button {
+    margin-right: 5px;
+    padding: 5px;
+    width: 20px;
+    height: 20px;
+    border: 1px solid #ccc;
+    cursor: pointer;
+  }
+
+  .format-button, .color-button {
+    background-color: #d3d3d3; /* Light grey */
+    color: black;
+  }
+  
+  .format-button:hover, .color-button:hover {
+    background-color: #c0c0c0; /* Slightly darker grey on hover */
+  }
+
+  .font-size-dropdown {
+    margin-left: 5px;
+    padding: 2px;
+    vertical-align: middle;
+  }
+
+  .trump-suit-buttons {
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
+
+  button.active {
+    background-color: #c0c0c0;
+    font-weight: bold;
+  }
+
+ 

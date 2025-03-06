@@ -1,0 +1,25 @@
+<h2>{{ getCategoryName(category) }} List</h2>
+<div style="position: relative; display: inline-block;">
+  <input #searchQuery type="text" placeholder="Search notes" (keyup.enter)="searchNotes(searchQuery.value, searchInContent.checked)">
+  <span *ngIf="searchQuery.value" (click)="searchQuery.value = ''; searchNotes('', searchInContent.checked)" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer;">x</span>
+</div>
+<label>
+  <input type="checkbox" #searchInContent>
+  Search in content too
+</label>
+<button (click)="searchNotes(searchQuery.value, searchInContent.checked)">Search</button>
+
+<ul>
+  <li *ngFor="let note of notes">
+    <div>
+      <strong (click)="viewNote(note.id)" style="cursor: pointer; text-decoration: underline; color: blue;">{{note.title}}</strong>
+      <span style="font-style:italic; font-size:12px; margin-left:8px; margin-right:8px;">{{note.id}}</span>
+      <a (click)="toggleDisplay(note)" style="cursor: pointer; margin: 0 5px;">{{note.isDisplayed ? 'Hide' : 'Show'}}</a>
+      <button (click)="toggleEdit(note)">Edit</button>
+      <a (click)="deleteNote(note.id)" style="cursor: pointer; margin: 0 5px; margin-right: 10px;">Delete</a>
+      <span *ngFor="let tag of note.hashtags" (click)="filterByHashtag(tag)" style="cursor: pointer; text-decoration: underline;">#{{tag}}</span>
+    </div>
+
+    <app-view-note *ngIf="note.isDisplayed && !note.isEditing" [note]="note"></app-view-note>
+  </li>
+</ul>

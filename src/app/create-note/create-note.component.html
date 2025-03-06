@@ -1,0 +1,11 @@
+<button (click)="toggleVisibility()">{{ isVisible ? 'Hide' : 'Create New' }}</button>
+<div *ngIf="isVisible">
+  <h2>Create New {{ getCategoryName(category) }}</h2>
+  <app-editor
+    [mode]="'create'"
+    [category]="category"
+    (save)="onNoteCreated($event)"
+    (cancel)="toggleVisibility()">
+  </app-editor>
+</div>
+<br>

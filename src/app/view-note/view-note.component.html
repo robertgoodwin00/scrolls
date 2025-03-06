@@ -1,0 +1,45 @@
+
+
+<div *ngIf="note" style="margin: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff;">
+  <span style="font-style:italic; font-size:12px;">{{note.id}}</span>
+  <br><br>
+  
+  <div style="display: flex; align-items: center; margin-bottom: 10px; font-family: 'Arial', sans-serif;">
+    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513; margin-right: 5px;">Title:</span>
+    <span [innerHTML]="safeTitle" style="font-weight:bold; font-size:larger;"></span>
+  </div>
+  <div style="display: flex; align-items: center; margin-bottom: 10px; font-family: 'Arial', sans-serif;">
+    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513; margin-right: 5px;">Authors:</span>
+    <span [innerHTML]="safeAuthor" ></span>
+  </div>
+  <hr style="margin: 10px 0;">
+  <div style="margin-bottom: 10px; font-family: 'Arial', sans-serif;">
+    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Type / Conditions:</span>
+    <span [innerHTML]="safePerforming"></span>
+  </div>
+  <hr style="margin: 10px 0;">
+  <div style="margin-bottom: 10px; font-family: 'Arial', sans-serif;">
+    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Props:</span>
+    <span [innerHTML]="safeProps"></span>
+  </div>
+  <hr style="margin: 10px 0;">
+  <div style="margin-bottom: 10px; font-family: 'Arial', sans-serif;">
+    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Setup:</span>
+    <span [innerHTML]="safeSetup"></span>
+  </div>
+  <hr style="margin: 10px 0;">
+  <div style="margin-bottom: 10px; font-family: 'Arial', sans-serif;">
+    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Working:</span>
+    <p [innerHTML]="safeContent"></p>
+  </div>
+  <hr style="margin: 10px 0;">
+  <div style="margin-bottom: 10px; font-family: 'Arial', sans-serif;">
+    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Notes:</span>
+    <span [innerHTML]="safeNotes"></span>
+  </div>
+  <hr style="margin: 10px 0;">
+  <p style="font-family: 'Arial', sans-serif;">
+    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Hashtags:</span>
+    <span *ngFor="let tag of note.hashtags">#{{tag}}</span>
+  </p>
+</div>

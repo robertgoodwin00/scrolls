@@ -1,0 +1,109 @@
+<!-- editor.component.html -->
+<div>
+  <div style="margin-bottom: 10px;">
+    <button (click)="selectTab('rendered')" [class.active]="activeTab === 'rendered'">Rendered</button>
+    <button (click)="selectTab('raw')" [class.active]="activeTab === 'raw'">Raw</button>
+  </div>
+
+  <ng-container *ngIf="note && activeTab === 'raw'; else renderedView">
+    <div class="formatting-buttons">
+      <button (click)="formatText('bold')" class="format-button" title="Bold"><b>B</b></button>
+      <button (click)="formatText('italic')" class="format-button" title="Italic"><i>I</i></button>
+      <button (click)="formatText('underline')" class="format-button" title="Underline"><u>U</u></button>
+      <select (change)="onFontSizeChange($event)" class="font-size-dropdown" style="margin-right:10px; margin-left:10px;">
+        <option value="" disabled selected>Font Size</option>
+        <option *ngFor="let size of fontSizes" [value]="size">{{ size }}px</option>
+      </select>
+      <span *ngFor="let color of colors">
+        <button (click)="formatText(color)" class="color-button" [style.backgroundColor]="color"> </button>
+      </span>
+    </div> 
+
+    <!-- New Dropdowns for Note Links -->
+    <div class="note-link-dropdowns" style="margin-top: 10px;">
+      <select (change)="insertNoteTag($event)" style="margin-right: 10px;">
+        <option value="" selected disabled>Sleights</option>
+        <option *ngFor="let note of sleightNotes" [value]="note.id">{{ note.id }} - {{ note.title || 'Untitled' }}</option>
+      </select>
+      <select (change)="insertNoteTag($event)" style="margin-right: 10px;">
+        <option value="" selected disabled>Tricks</option>
+        <option *ngFor="let note of trickNotes" [value]="note.id">{{ note.id }} - {{ note.title || 'Untitled' }}</option>
+      </select>
+      <select (change)="insertNoteTag($event)" style="margin-right: 10px;">
+        <option value="" selected disabled>Routines</option>
+        <option *ngFor="let note of routineNotes" [value]="note.id">{{ note.id }} - {{ note.title || 'Untitled' }}</option>
+      </select>
+      <select (change)="insertNoteTag($event)">
+        <option value="" selected disabled>Acts</option>
+        <option *ngFor="let note of actNotes" [value]="note.id">{{ note.id }} - {{ note.title || 'Untitled' }}</option>
+      </select>
+    </div>
+
+    <div class="trump-suit-buttons">
+      <button (click)="insertTrumpSuit('spade')" class="format-button" style="color: black" title="spades">♠</button>
+      <button (click)="insertTrumpSuit('club')" class="format-button" style="color: black" title="clubs">♣</button>
+      <button (click)="insertTrumpSuit('heart')" class="format-button" style="color: red" title="hearts">♥</button>
+      <button (click)="insertTrumpSuit('diamond')" class="format-button" style="color: red" title="diamonds">♦</button>
+      <button (click)="insertSymbol('joker')" class="format-button" title="joker">🃏</button>
+      <button (click)="insertSymbol('face-down-card')" class="format-button" title="face-down card">┬</button>
+      <button (click)="insertSymbol('face-up-card')" class="format-button" title="face-up card">┴</button>
+      <button (click)="insertSymbol('face-down-packet')" class="format-button" title="face-down packet">╤</button>
+      <button (click)="insertSymbol('face-up-packet')" class="format-button" title="face-up packet">╧</button>
+      <button (click)="insertSymbol('double-face-card')" class="format-button" title="double-face card">┼</button>
+      <button (click)="insertSymbol('double-back-card')" class="format-button" title="double-back card">Ɪ</button>
+      <button (click)="insertSymbol('magician')" class="format-button" title="magician">ɱ</button>
+      <button (click)="insertSymbol('spectator')" class="format-button" title="spectator">ʂ</button>
+      <button (click)="insertSymbol('card-selected')" class="format-button" title="card selected">↑</button>
+      <button (click)="insertSymbol('card-returned')" class="format-button" title="card returned">↓</button>
+      <button (click)="insertSymbol('selection')" class="format-button" title="selection">ε</button>
+      <button (click)="insertSymbol('card-dealt-from-top')" class="format-button" title="card dealt from top">→</button>
+      <button (click)="insertSymbol('card-placed-on-top')" class="format-button" title="card placed on top">←</button>
+      <button (click)="insertSymbol('card-switch')" class="format-button" title="card switch">↔</button>
+      <button (click)="insertSymbol('shuffle')" class="format-button" title="shuffle">╬</button>
+      <button (click)="insertSymbol('cut')" class="format-button" title="cut">╗</button>
+    </div>
+
+    <div style="display: flex; align-items: center;">
+      <input [(ngModel)]="note.title" placeholder="Title" style="flex: 1; margin-right: 10px; width: 50%; max-width: 350px;" #titleInput (focus)="onFocus(titleInput)">
+      <input [(ngModel)]="note.author" placeholder="Authors" style="width: 50%; max-width: 350px;" #authorInput (focus)="onFocus(authorInput)">
+    </div>
+
+    <div style="display: flex; align-items: center;">
+      <textarea [(ngModel)]="note.performing" placeholder="Type of effect / performing conditions" style="flex: 1; margin-right: 10px;" #performingTextarea (focus)="onFocus(performingTextarea)"></textarea>
+      <button (click)="insertPerformingSymbol('impromptu')" class="format-button" title="impromptu">✽</button>
+      <button (click)="insertPerformingSymbol('table')" class="format-button" title="table">Ͳ</button>
+      <button (click)="insertPerformingSymbol('standing')" class="format-button" title="standing">λ</button>
+      <button (click)="insertPerformingSymbol('wearing-pockets')" class="format-button" title="wearing pockets">Ϸ</button>
+      <button (click)="insertPerformingSymbol('packet-effect')" class="format-button" title="packet effect">▱</button>
+      <button (click)="insertPerformingSymbol('any-surface')" class="format-button" title="any surface (close-up pad not required)">︿</button>
+      <button (click)="insertPerformingSymbol('angle-sensitive')" class="format-button" title="angle-sensitive">✥</button>
+    </div>
+
+    <div style="display: flex; align-items: center;">
+      <textarea [(ngModel)]="note.props" placeholder="Props" style="flex: 1; margin-right: 10px;" #propsTextarea (focus)="onFocus(propsTextarea)"></textarea>
+      <button (click)="insertPropsSymbol('pen')" class="format-button" title="pen">✐</button>
+      <button (click)="insertPropsSymbol('coins')" class="format-button" title="coin(s)">¢</button>
+      <button (click)="insertPropsSymbol('bills')" class="format-button" title="bill(s)">$</button>
+      <button (click)="insertPropsSymbol('wallet')" class="format-button" title="wallet">Ⱳ</button>
+      <button (click)="insertPropsSymbol('envelope')" class="format-button" title="envelope">✉</button>
+      <button (click)="insertPropsSymbol('hankerchief')" class="format-button" title="hankerchief">ꜧ</button>
+      <button (click)="insertPropsSymbol('dice')" class="format-button" title="dice">⚂</button>
+    </div>
+
+    <textarea [(ngModel)]="note.setup" placeholder="Setup" #setupTextarea (focus)="onFocus(setupTextarea)"></textarea>
+    <textarea [(ngModel)]="note.content" placeholder="Working" #contentTextarea rows="10" (focus)="onFocus(contentTextarea)"></textarea>
+    <textarea [(ngModel)]="note.notes" placeholder="Notes" #notesTextarea (focus)="onFocus(notesTextarea)"></textarea>
+    
+    <ng-container *ngIf="activeTab === 'raw'">
+      <input [(ngModel)]="note.hashtags" placeholder="Hashtags (comma-separated)" (ngModelChange)="convertHashtagsToArray($event)">
+    </ng-container>
+
+  </ng-container>
+
+  <ng-template #renderedView>
+    <app-view-note *ngIf="note" [note]="note"></app-view-note>
+  </ng-template>
+
+  <button (click)="saveNote()">Save</button>
+  <button (click)="cancelEdit()">Cancel</button>
+</div>

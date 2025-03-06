@@ -1,0 +1,34 @@
+<app-tabs (tabSelected)="onTabSelected($event)"> 
+
+  <div #editorSection *ngIf="selectedNote">
+    <h2>Edit Note</h2>
+    <app-editor 
+      [note]="selectedNote" 
+      [mode]="'edit'" 
+      [category]="activeTab"
+      [initialTab]="initialTab"
+      (save)="onNoteSaved($event)"
+      (cancel)="onCancelEdit()">
+    </app-editor>
+  </div>
+
+  <div *ngIf="!selectedNote">
+    <app-create-note 
+      [category]="activeTab" 
+      (save)="onNoteSaved($event)">
+    </app-create-note>
+  </div>  
+
+  <hr>
+  
+  <button (click)="isNoteListVisible = !isNoteListVisible">
+    {{isNoteListVisible ? 'Hide List' : 'Show List'}}
+  </button>
+
+  <div *ngIf="isNoteListVisible">
+    <app-note-list 
+      [category]="activeTab" 
+      (editNote)="onEditNote($event)">
+    </app-note-list>
+  </div>
+</app-tabs>
