@@ -1,13 +1,21 @@
+#body {
+  margin: 20px;
+}
+
 .formatting-buttons {
-    margin-bottom: 10px;
-  }
-  
+  margin-bottom: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
   .format-button {
     margin-right: 5px;
     padding: 5px 10px;
     font-size: 14px;
     cursor: pointer;
   }
+  
   
   .color-button {
     margin-right: 5px;
@@ -27,6 +35,20 @@
     background-color: #c0c0c0; /* Slightly darker grey on hover */
   }
 
+  /* mobile-specific overrides */
+  @media screen and (max-width: 768px) {
+    .formatting-buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    
+    .format-button, .color-button {
+      min-height: 48px;
+      min-width: 48px;
+    }
+  }
+
   .font-size-dropdown {
     margin-left: 5px;
     padding: 2px;
@@ -36,6 +58,38 @@
   .trump-suit-buttons {
     margin-top: 10px;
     margin-bottom: 10px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .note-link-dropdowns {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .note-link-dropdowns select {
+    min-width: 100px;
+    flex: 1 1 auto;
+  }
+
+  @media screen and (max-width: 480px) {
+    .format-button {
+      padding: 8px;
+      min-height: 44px;
+      min-width: 44px;
+    }
+    
+    .color-button {
+      width: 30px;
+      height: 30px;
+    }
+    
+    .note-link-dropdowns select {
+      width: 100%;
+      margin-right: 0 !important;
+    }
   }
 
   button.active {
@@ -44,3 +98,17 @@
   }
 
  
+ 
+
+
+  #room {
+  min-width: 1px;
+  padding: 10px;
+  border: 1px solid #ccc;
+  margin-bottom: 10px;
+  min-height:20px; 
+  position: relative;
+  z-index: -1;
+  box-sizing: border-box; 
+}
+

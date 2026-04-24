@@ -4,7 +4,7 @@ export interface Note {
     author: string;
     content: string;
     hashtags?: string[];
-    category: number;  // 1: Sleight, 2: Trick, 3: Routine, 4: Act
+    category: number;  // 0: General, 1: Sleight, 2: Trick, 3: Routine, 4: Act
     performing: string;
     props: string;
     setup: string;

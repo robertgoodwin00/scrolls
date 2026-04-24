@@ -1,6 +1,13 @@
-<ul>
+<div class="tabs-container">
+  <ul>
     <li *ngFor="let tab of tabs; let i = index" (click)="selectTab(i)" [class.active]="i === activeTabIndex">
       {{ tab }}
     </li>
   </ul>
+  <div class="button-container">
+    <button class="export" (click)="exportData()">Export</button>
+    <button class="import" (click)="importData()">Import</button>
+    <button class="clear" (click)="clearData()">Clear</button>
+  </div>
+</div>
 <ng-content></ng-content>

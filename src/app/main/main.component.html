@@ -1,34 +1,69 @@
-<app-tabs (tabSelected)="onTabSelected($event)"> 
-
-  <div #editorSection *ngIf="selectedNote">
-    <h2>Edit Note</h2>
-    <app-editor 
-      [note]="selectedNote" 
-      [mode]="'edit'" 
-      [category]="activeTab"
-      [initialTab]="initialTab"
-      (save)="onNoteSaved($event)"
-      (cancel)="onCancelEdit()">
-    </app-editor>
-  </div>
-
-  <div *ngIf="!selectedNote">
-    <app-create-note 
-      [category]="activeTab" 
-      (save)="onNoteSaved($event)">
-    </app-create-note>
-  </div>  
-
-  <hr>
+<div class="main-container">
+  <app-tabs 
+    (tabSelected)="onTabSelected($event)" 
+    (notesImported)="onNotesImported()"
+    (notesCleared)="onNotesCleared()">
+  </app-tabs>
   
-  <button (click)="isNoteListVisible = !isNoteListVisible">
-    {{isNoteListVisible ? 'Hide List' : 'Show List'}}
+  <!-- Hamburger button for mobile -->
+  <button class="hamburger-button" (click)="toggleMobileMenu()" aria-label="Toggle menu">
+    ☰ Notes
   </button>
+  
+  <div class="split-screen" #splitScreen>
+    <!-- Mobile Overlay -->
+    <div class="mobile-overlay" [class.open]="isMobileMenuOpen" (click)="closeMobileMenu()"></div>
+    
+    <!-- Left Panel: Note List -->
+    <div class="left-panel" [class.mobile-open]="isMobileMenuOpen" [style.width.%]="leftPanelWidth">
+      <div class="note-list-header">
+        <span style="font-size:20px; font-weight:bold;">Tricks and Stuff</span>
+        <button class="close-menu-button" (click)="closeMobileMenu()" aria-label="Close menu">✕</button>
+      </div>
+      
+      <div *ngIf="isNoteListVisible" class="note-list-container">
+        <app-note-list 
+          [category]="activeTab" 
+          (editNote)="onEditNote($event)">
+        </app-note-list>
+      </div>
+      
+      <div class="mobile-close-footer">
+        <button (click)="closeMobileMenu()">Close</button>
+      </div>
+    </div>
 
-  <div *ngIf="isNoteListVisible">
-    <app-note-list 
-      [category]="activeTab" 
-      (editNote)="onEditNote($event)">
-    </app-note-list>
+    <!-- Resize Handle -->
+    <div class="resize-handle" 
+         (mousedown)="startResize($event)"
+         (touchstart)="startResize($event)">
+    </div>
+
+    <!-- Right Panel: Editor/Create Note -->
+    <div #editorSection class="right-panel">
+      <div *ngIf="selectedNote">
+        <h2>View/Edit</h2>
+        <app-editor 
+          *ngIf="isEditorVisible"  
+          [note]="selectedNote" 
+          [mode]="'edit'" 
+          [category]="activeTab"
+          [initialTab]="initialTab"
+          (save)="onNoteSaved($event)"
+          (cancel)="onCancelEdit()">
+        </app-editor>
+      </div>
+
+      <div *ngIf="!selectedNote">
+        <h2>Create New</h2>
+        <app-create-note 
+          [category]="activeTab" 
+          (save)="onNoteSaved($event)">
+        </app-create-note>
+      </div>
+    </div>
   </div>
-</app-tabs>
+</div>
+
+
+

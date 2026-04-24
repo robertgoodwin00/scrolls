@@ -1,8 +1,10 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, EventEmitter, HostListener, Input, OnInit, Output, SimpleChanges } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { NoteService } from '../note.service';
+import { BackReferencesService } from '../back-reference.service';
 import { SafeHtml } from '@angular/platform-browser';
 import { SanitizationService } from '../sanitization.service';
+import { Note } from '../../models/note';
 
 @Component({
   standalone: false,
@@ -11,7 +13,9 @@ import { SanitizationService } from '../sanitization.service';
   styleUrls: ['./view-note.component.css']
 })
 export class ViewNoteComponent implements OnInit {
-  @Input() note: any;
+  @Input() note: Note | undefined;
+  @Output() noteNavigate = new EventEmitter<string>();
+
   safeTitle: SafeHtml | undefined;
   safeAuthor: SafeHtml | undefined;
   safeContent: SafeHtml | undefined;
@@ -19,51 +23,66 @@ export class ViewNoteComponent implements OnInit {
   safeProps: SafeHtml | undefined;
   safeSetup: SafeHtml | undefined;
   safeNotes: SafeHtml | undefined;
+  backReferences: Note[] = [];
 
   constructor(
     private route: ActivatedRoute,
     private noteService: NoteService,
+    private backReferencesService: BackReferencesService,
     private sanitizationService: SanitizationService
   ) {}
 
-  async ngOnInit() {
-    this.route.params.subscribe(async params => {
+  ngOnInit() {
+    this.route.params.subscribe(params => {
       if (params['id']) {
-        this.noteService.getNote(params['id']).subscribe(async note => {
+        this.noteService.getNote(params['id']).subscribe(note => {
           this.note = note;
-          this.safeTitle = await this.sanitizationService.sanitizeContent(note?.title || '');
-          this.safeAuthor = await this.sanitizationService.sanitizeContent(note?.author || '');
-          this.safeContent = await this.sanitizationService.sanitizeContent(note?.content || '');
-          this.safePerforming = await this.sanitizationService.sanitizeContent(note?.performing || '');
-          this.safeProps = await this.sanitizationService.sanitizeContent(note?.props || '');
-          this.safeSetup = await this.sanitizationService.sanitizeContent(note?.setup || '');
-          this.safeNotes = await this.sanitizationService.sanitizeContent(note?.notes || '');
+          this.sanitizeNoteFields();
+          this.loadBackReferences();
         });
       } else if (this.note) {
-        this.safeTitle = await this.sanitizationService.sanitizeContent(this.note?.title || '');
-        this.safeAuthor = await this.sanitizationService.sanitizeContent(this.note?.author || '');
-        this.safeContent = await this.sanitizationService.sanitizeContent(this.note?.content || '');
-        this.safePerforming = await this.sanitizationService.sanitizeContent(this.note?.performing || '');
-        this.safeProps = await this.sanitizationService.sanitizeContent(this.note?.props || '');
-        this.safeSetup = await this.sanitizationService.sanitizeContent(this.note?.setup || '');
-        this.safeNotes = await this.sanitizationService.sanitizeContent(this.note?.notes || '');
+        this.sanitizeNoteFields();
+        this.loadBackReferences();
       }
     });
   }
-}
 
-
-
-  /*
-  import { Component, Input } from '@angular/core';
-
-  @Component({
-    standalone: false,
-    selector: 'app-view-note',
-    templateUrl: './view-note.component.html',
-    styleUrls: ['./view-note.component.css']
-  })
-  export class ViewNoteComponent {
-    @Input() note: any;
+  // Handles clicks on dynamically rendered note-link elements inside [innerHTML]
+  @HostListener('click', ['$event'])
+  onContentClick(event: Event) {
+    const target = event.target as HTMLElement;
+    if (target.classList.contains('note-link')) {
+      event.preventDefault();
+      const noteId = target.getAttribute('data-note-id');
+      if (noteId) {
+        this.onNoteClick(noteId);
+      }
+    }
   }
-  */
+
+  ngOnChanges(changes: SimpleChanges) {
+    if (changes['note'] && this.note) {
+      this.sanitizeNoteFields();
+      this.loadBackReferences();
+    }
+  }
+
+  private async sanitizeNoteFields() {
+    if (!this.note) return;
+    const sanitized = await this.sanitizationService.sanitizeNote(this.note);
+    Object.assign(this, sanitized);
+  }
+
+  private loadBackReferences() {
+    if (!this.note?.id) return;
+    this.backReferencesService.getBackReferences(this.note.id).subscribe(
+      references => {
+        this.backReferences = references;
+      }
+    );
+  }
+
+  onNoteClick(noteId: string) {
+    this.noteNavigate.emit(noteId);
+  }
+}

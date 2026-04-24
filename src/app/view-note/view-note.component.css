@@ -6,3 +6,13 @@ spade, club {
   heart, diamond {
     color: red !important;
   }
+
+
+.note-content {
+  white-space: pre-wrap; /* Preserves spaces and wraps text */
+}
+
+/* Optional: Apply to specific fields if needed */
+.title, .author, .performing, .props, .setup, .content, .notes {
+  white-space: pre-wrap;
+}

@@ -1,3 +1,128 @@
-ul { list-style-type: none; padding: 0; }
-li { display: inline; margin-right: 10px; cursor: pointer; }
-.active { font-weight: bold; }
+.tabs-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #f5f5f5;
+  border-bottom: 1px solid #ccc;
+  flex-wrap: wrap;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+}
+
+li {
+  padding: 10px 20px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
+}
+
+li:hover {
+  background-color: #e0e0e0;
+}
+
+li.active {
+  background-color: #fff;
+  border-bottom: 2px solid #1976d2;
+  font-weight: bold;
+}
+
+.button-container {
+  padding: 10px;
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.button-container button {
+  margin-left: 0;
+  padding: 8px 16px;
+  font-size: 16px;
+  font-weight: bold;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s, transform 0.2s;
+  min-height: 44px;
+  min-width: 44px;
+}
+
+.button-container button.export {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.button-container button.import {
+  background-color: #2196F3;
+  color: white;
+}
+
+.button-container button.clear {
+  background-color: #f44336;
+  color: white;
+}
+
+.button-container button.export:hover {
+  background-color: #45a049;
+  transform: scale(1.05);
+}
+
+.button-container button.import:hover {
+  background-color: #1e88e5;
+  transform: scale(1.05);
+}
+
+.button-container button.clear:hover {
+  background-color: #d32f2f;
+  transform: scale(1.05);
+}
+
+/* Tablet breakpoint */
+@media screen and (max-width: 768px) {
+  .tabs-container {
+    padding: 5px;
+  }
+
+  ul {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  li {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+
+  .button-container {
+    flex: 1 1 100%;
+    justify-content: center;
+    padding: 5px;
+    gap: 8px;
+  }
+
+  .button-container button {
+    padding: 8px 12px;
+    font-size: 14px;
+  }
+}
+
+/* Mobile breakpoint */
+@media screen and (max-width: 480px) {
+  li {
+    padding: 8px 10px;
+    font-size: 13px;
+    min-height: 40px;
+  }
+
+  .button-container button {
+    padding: 10px 14px;
+    font-size: 14px;
+    flex: 1 1 auto;
+  }
+}

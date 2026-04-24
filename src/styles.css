@@ -4,6 +4,7 @@ body {
   color: #333;
 }
 
+/* Default button styles */
 button {
   background-color: #8B4513; /* Reddish-brown */
   color: white;
@@ -15,6 +16,11 @@ button {
 
 button:hover {
   background-color: #A52A2A; /* Darker shade */
+}
+
+/* Ensure specific button styles in components take precedence */
+.tabs-container button {
+  background-color: inherit; /* Reset to allow specific styles */
 }
 
 input, textarea {
@@ -36,8 +42,12 @@ li {
 hr {
   border: 0;
   height: 1px;
+  background-color: #999; /* Fallback for older browsers */
+  background-image: -webkit-linear-gradient(left, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
+  background-image: -moz-linear-gradient(left, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
   background-image: linear-gradient(to right, rgba(0, 0, 0, 0), rgba(0, 0, 0, 0.75), rgba(0, 0, 0, 0));
 }
+
 
 a {
   color: #8B4513;
@@ -50,5 +60,8 @@ a:hover {
   color: #A52A2A;
   text-decoration: none;
 }
+
 html, body { height: 100%; }
 body { margin: 0; font-family: Roboto, "Helvetica Neue", sans-serif; }
+
+

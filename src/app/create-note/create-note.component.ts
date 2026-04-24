@@ -10,7 +10,7 @@ import { Note } from '../../models/note';
 })
 export class CreateNoteComponent {
   @Input() category!: number;
-  @Output() save = new EventEmitter<Note>();  // Add this output
+  @Output() save = new EventEmitter<Note>();  
   isVisible = true;
 
   constructor(private noteService: NoteService) {}
@@ -19,14 +19,18 @@ export class CreateNoteComponent {
     this.isVisible = !this.isVisible;
   }
 
-  onNoteCreated(note: Note) {  // Update this method
-    this.save.emit(note);
-    this.isVisible = false;
-    this.noteService.notifyNoteAdded();
+  onNoteCreated(note: Note) {
+    console.log('Note created with ID:', note.id);
+    this.noteService.createNote(note).subscribe((savedNote: Note) => {
+      console.log('Saved note with ID:', savedNote.id);
+      this.save.emit(savedNote);
+      this.isVisible = false;
+    });
   }
 
   getCategoryName(category: number): string {
-    const names = ['Sleight', 'Trick', 'Routine', 'Act'];
-    return names[category - 1];
+    const names = ['General', 'Sleight', 'Trick', 'Routine', 'Act'];
+    return names[category];
   }
 }
+

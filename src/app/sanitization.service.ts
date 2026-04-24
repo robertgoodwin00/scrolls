@@ -2,6 +2,8 @@ import { Injectable, EventEmitter } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { NoteService } from './note.service';
 import { firstValueFrom } from 'rxjs';
+import { Note } from '../models/note';
+import DOMPurify from 'dompurify';
 
 @Injectable({
   providedIn: 'root'
@@ -59,32 +61,63 @@ export class SanitizationService {
       return this.sanitizer.bypassSecurityTrustHtml('');
     }
 
-    let sanitizedContent = content;
+    let processedContent = content;
 
-    // Regular expression to find note ID tags like <a32>, <r10>, etc.
-    const noteIdRegex = /<([rats]\d+)>/g;
+    // Preserve leading spaces by converting them to &nbsp;
+    const leadingSpaceRegex = /^(\s+)/;
+    const leadingMatch = processedContent.match(leadingSpaceRegex);
+    if (leadingMatch) {
+      const leadingSpaces = leadingMatch[0];
+      const nbspCount = leadingSpaces.length;
+      const nbspReplacement = '&nbsp;'.repeat(nbspCount);
+      processedContent = processedContent.replace(leadingSpaceRegex, nbspReplacement);
+    }
+
+    // Handle note ID tags
+    const noteIdRegex = /<([grats]\d+)>/g;
     let match;
-
     while ((match = noteIdRegex.exec(content)) !== null) {
-      const fullTag = match[0]; // e.g., "<a32>"
-      const noteId = match[1];  // e.g., "a32"
-
+      const fullTag = match[0];
+      const noteId = match[1];
       if (this.noteService.isValidNoteId(noteId)) {
         try {
           const title = await firstValueFrom(this.noteService.getNoteTitle(noteId));
-          // Use a span with an onclick event to emit the note ID
-          const link = `<span style="color: blue; text-decoration: underline; cursor: pointer;" onclick="document.dispatchEvent(new CustomEvent('noteLinkClick', { detail: '${noteId}' }))">${title}</span>`;
-          sanitizedContent = sanitizedContent.replace(fullTag, link);
+          const link = `<span class="note-link" data-note-id="${noteId}" style="color: blue; text-decoration: underline; cursor: pointer;">${title}</span>`;
+          processedContent = processedContent.replace(fullTag, link);
         } catch (error) {
-          sanitizedContent = sanitizedContent.replace(fullTag, noteId);
+          processedContent = processedContent.replace(fullTag, noteId);
         }
       }
     }
 
+    // Apply symbol replacements
     for (const [tag, replacement] of Object.entries(this.replacements)) {
-      sanitizedContent = sanitizedContent.split(tag).join(replacement);
+      processedContent = processedContent.split(tag).join(replacement);
     }
 
-    return this.sanitizer.bypassSecurityTrustHtml(sanitizedContent);
+    // Sanitize with DOMPurify BEFORE bypassing Angular security
+    const cleanHtml = DOMPurify.sanitize(processedContent, {
+      ALLOWED_TAGS: ['b', 'i', 'u', 'span', 'br', 'p'],
+      ALLOWED_ATTR: ['style', 'class', 'data-note-id'],
+      ALLOW_DATA_ATTR: false
+    });
+
+    return this.sanitizer.bypassSecurityTrustHtml(cleanHtml);
   }
+
+
+    // sanitization.service.ts
+  async sanitizeNote(note: Note): Promise<{ [key: string]: SafeHtml }> {
+    return {
+      safeTitle: await this.sanitizeContent(note.title || ''),
+      safeAuthor: await this.sanitizeContent(note.author || ''),
+      safeContent: await this.sanitizeContent(note.content || ''),
+      safePerforming: await this.sanitizeContent(note.performing || ''),
+      safeProps: await this.sanitizeContent(note.props || ''),
+      safeSetup: await this.sanitizeContent(note.setup || ''),
+      safeNotes: await this.sanitizeContent(note.notes || '')
+    };
+  }
+
+
 }

@@ -1,47 +1,72 @@
-import { ComponentFixture, TestBed } from "@angular/core/testing";
-import { ViewNoteComponent } from "./view-note.component";
-import { NoteService } from "../note.service";
-import { RouterModule } from "@angular/router";
-import { CommonModule } from "@angular/common";
-import { By } from "@angular/platform-browser";
-import { of } from "rxjs";
+import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { ViewNoteComponent } from './view-note.component';
+import { NoteService } from '../note.service';
+import { SanitizationService } from '../sanitization.service';
+import { ActivatedRoute } from '@angular/router';
+import { of } from 'rxjs';
+import { Note } from '../../models/note';
 
 describe('ViewNoteComponent', () => {
   let component: ViewNoteComponent;
   let fixture: ComponentFixture<ViewNoteComponent>;
-  let noteService: NoteService;
+  let noteService: jasmine.SpyObj<NoteService>;
+  let sanitizationService: jasmine.SpyObj<SanitizationService>;
 
   beforeEach(async () => {
+    const noteServiceSpy = jasmine.createSpyObj('NoteService', ['getNote']);
+    const sanitizationServiceSpy = jasmine.createSpyObj('SanitizationService', ['sanitizeNote']);
+    const activatedRouteStub = {
+      params: of({ id: '1' }),
+    };
+
     await TestBed.configureTestingModule({
-      imports: [CommonModule, RouterModule.forRoot([])],
       declarations: [ViewNoteComponent],
-      providers: [{ provide: NoteService, useValue: { getNote: () => of({}) } }]
+      providers: [
+        { provide: NoteService, useValue: noteServiceSpy },
+        { provide: SanitizationService, useValue: sanitizationServiceSpy },
+        { provide: ActivatedRoute, useValue: activatedRouteStub },
+      ],
     }).compileComponents();
 
     fixture = TestBed.createComponent(ViewNoteComponent);
     component = fixture.componentInstance;
-    noteService = TestBed.inject(NoteService);
-    component.note = { id: '1', title: 'Test', author: 'Author', content: 'Content', hashtags: ['tag'], category: 1, performing: '', props: '', setup: '', notes: '' };
+    noteService = TestBed.inject(NoteService) as jasmine.SpyObj<NoteService>;
+    sanitizationService = TestBed.inject(SanitizationService) as jasmine.SpyObj<SanitizationService>;
+
+    const mockNote: Note = {
+      id: '1',
+      title: 'Test Note',
+      author: 'Test Author',
+      content: 'Test Content',
+      category: 0,
+      performing: '',
+      props: '',
+      setup: '',
+      notes: '',
+    };
+    noteService.getNote.and.returnValue(of(mockNote));
+    sanitizationService.sanitizeNote.and.returnValue(
+      Promise.resolve({
+        safeTitle: 'Safe Title',
+        safeAuthor: 'Safe Author',
+        safeContent: 'Safe Content',
+        safePerforming: '',
+        safeProps: '',
+        safeSetup: '',
+        safeNotes: '',
+      })
+    );
+
     fixture.detectChanges();
   });
 
-  // Test component creation
   it('should create', () => {
     expect(component).toBeTruthy();
   });
 
-  // Test note content sanitization
-  it('should sanitize note content', () => {
-    component.ngOnInit();
+  it('should sanitize note fields on init', async () => {
+    await fixture.whenStable(); // Wait for async operations
     expect(component.safeTitle).toBeDefined();
-    expect(component.safeContent).toBeDefined();
-  });
-
-  // Test note display with hashtags
-  it('should display note with hashtags', () => {
-    fixture.detectChanges();
-    const hashtagElements = fixture.debugElement.queryAll(By.css('span'));
-    expect(hashtagElements.length).toBeGreaterThan(0);
+    expect(component.safeAuthor).toBeDefined();
   });
 });
-

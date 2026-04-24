@@ -1,4 +1,5 @@
 
+
 label {
     display: inline-flex;
     align-items: center;
@@ -19,3 +20,74 @@ label input[type="checkbox"] {
     
 
 }
+
+
+#body {
+  margin: 0px 20px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
+ul {
+  max-height: 500px; /* Adjust based on your layout */
+  overflow: auto;
+  padding: 0;
+  margin: 0;
+  width: 100%;
+  box-sizing: border-box; /* Ensure padding doesn't cause overflow */
+}
+
+li {
+  margin-bottom: 10px;
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+li div {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap; /* Allow content to wrap */
+  align-items: center;
+  max-width: 100%;
+  overflow-wrap: break-word;
+}
+
+li.highlight {
+  background-color: #e6f3ff;
+  transition: background-color 0.5s ease;
+}
+
+li strong,
+li span,
+li button,
+li a {
+  white-space: nowrap; /* Prevent individual elements from wrapping unnecessarily */
+  margin-right: 8px;
+}
+
+li.highlight {
+  background-color: #e6f3ff;
+  transition: background-color 0.5s ease;
+}
+
+input[type="text"] {
+  padding: 5px;
+  margin: 10px 0;
+  width: 100%;
+}
+
+button {
+  margin: 5px;
+  padding: 5px 10px;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+

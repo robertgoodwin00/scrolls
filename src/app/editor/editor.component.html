@@ -1,8 +1,8 @@
 <!-- editor.component.html -->
-<div>
+<div id="body">
   <div style="margin-bottom: 10px;">
-    <button (click)="selectTab('rendered')" [class.active]="activeTab === 'rendered'">Rendered</button>
-    <button (click)="selectTab('raw')" [class.active]="activeTab === 'raw'">Raw</button>
+    <button (click)="selectTab('rendered')" [class.active]="activeTab === 'rendered'">View</button>
+    <button (click)="selectTab('raw')" [class.active]="activeTab === 'raw'">Edit</button>
   </div>
 
   <ng-container *ngIf="note && activeTab === 'raw'; else renderedView">
@@ -22,6 +22,10 @@
     <!-- New Dropdowns for Note Links -->
     <div class="note-link-dropdowns" style="margin-top: 10px;">
       <select (change)="insertNoteTag($event)" style="margin-right: 10px;">
+        <option value="" selected disabled>General</option>
+        <option *ngFor="let note of generalNotes" [value]="note.id">{{ note.id }} - {{ note.title || 'Untitled' }}</option>
+      </select>
+      <select (change)="insertNoteTag($event)" style="margin-right: 10px;">
         <option value="" selected disabled>Sleights</option>
         <option *ngFor="let note of sleightNotes" [value]="note.id">{{ note.id }} - {{ note.title || 'Untitled' }}</option>
       </select>
@@ -38,6 +42,7 @@
         <option *ngFor="let note of actNotes" [value]="note.id">{{ note.id }} - {{ note.title || 'Untitled' }}</option>
       </select>
     </div>
+
 
     <div class="trump-suit-buttons">
       <button (click)="insertTrumpSuit('spade')" class="format-button" style="color: black" title="spades">♠</button>
@@ -64,8 +69,13 @@
     </div>
 
     <div style="display: flex; align-items: center;">
-      <input [(ngModel)]="note.title" placeholder="Title" style="flex: 1; margin-right: 10px; width: 50%; max-width: 350px;" #titleInput (focus)="onFocus(titleInput)">
-      <input [(ngModel)]="note.author" placeholder="Authors" style="width: 50%; max-width: 350px;" #authorInput (focus)="onFocus(authorInput)">
+      <input [(ngModel)]="note.title" placeholder="Title" 
+       style="flex: 1; margin-right: 10px; width: 50%; max-width: 350px;" 
+       #titleInput (focus)="onFocus(titleInput)">
+
+      <input [(ngModel)]="note.author" placeholder="Source" 
+      style="width: 50%; max-width: 350px;" 
+      #authorInput (focus)="onFocus(authorInput)">
     </div>
 
     <div style="display: flex; align-items: center;">
@@ -90,20 +100,39 @@
       <button (click)="insertPropsSymbol('dice')" class="format-button" title="dice">⚂</button>
     </div>
 
+
+    <!-- do not touch this div -->
+    <div *ngIf="isAtOn" id="room-description-container" style="position: relative; width: 600px; height: 50px; z-index: 1; margin-bottom:50px;">
+      <div id="room" [style.display]="isCtrlPressed ? 'none' : 'block'"></div>
+      <app-at [isCtrlPressed]="isCtrlPressed"></app-at>
+      
+    </div>
+
     <textarea [(ngModel)]="note.setup" placeholder="Setup" #setupTextarea (focus)="onFocus(setupTextarea)"></textarea>
     <textarea [(ngModel)]="note.content" placeholder="Working" #contentTextarea rows="10" (focus)="onFocus(contentTextarea)"></textarea>
     <textarea [(ngModel)]="note.notes" placeholder="Notes" #notesTextarea (focus)="onFocus(notesTextarea)"></textarea>
     
     <ng-container *ngIf="activeTab === 'raw'">
-      <input [(ngModel)]="note.hashtags" placeholder="Hashtags (comma-separated)" (ngModelChange)="convertHashtagsToArray($event)">
+      <input [(ngModel)]="hashtagInput" placeholder="Tags (comma-separated)" (ngModelChange)="convertHashtagsToArray($event)">
     </ng-container>
+    
 
   </ng-container>
 
   <ng-template #renderedView>
-    <app-view-note *ngIf="note" [note]="note"></app-view-note>
+    <!--<app-view-note *ngIf="note" [note]="note"></app-view-note>-->
+
+    <app-view-note  *ngIf="note"
+      [note]="note" 
+      (noteNavigate)="onNavigateToNote($event)">
+    </app-view-note>
   </ng-template>
 
   <button (click)="saveNote()">Save</button>
   <button (click)="cancelEdit()">Cancel</button>
 </div>
+
+
+<!--<textarea [(ngModel)]="note.content" placeholder="Working" #contentTextarea rows="10" (focus)="onFocus(contentTextarea)"></textarea>-->
+
+

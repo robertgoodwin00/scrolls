@@ -1,0 +1,67 @@
+.at-container {
+  min-height: 50px;
+  max-height: 120px;
+  overflow-y: auto; /* Ensure vertical scrolling is enabled */
+  padding: 10px;
+  margin-bottom: 0; /* Remove bottom margin to fit within overlay */
+  max-width: 800px;
+  width: 480px; /* Adjusted to fit within 800px container with padding */
+  box-sizing: border-box; /* Ensure padding is included in width/height */
+  height: 1120px; /* Explicitly set height to match overlay */
+}
+
+.input-container {
+  display: flex;
+  gap: 10px;
+  padding: 10px;
+  width: 400px;
+  height: 50px; /* Fixed height for input */
+  background-color: #fff; /* Added background to ensure visibility */
+  z-index: 1; /* Ensure input is above overlay */
+  position: absolute; /* Position below overlay */
+  top: 50px; /* Position directly below overlay */
+  left: 0;
+  box-sizing: border-box; /* Ensure padding is included in width/height */
+}
+
+.user-message {
+  text-align: right;
+  background-color: #e3f2fd;
+  padding: 10px;
+  margin: 5px 0;
+  border-radius: 5px;
+}
+
+.bot-message {
+  text-align: left;
+  background-color: #f5f5f5;
+  padding: 2px;
+  margin: 2px 0;
+  border-radius: 5px;
+}
+
+input {
+  flex: 1;
+  padding: 5px;
+  width: 70%;
+  margin-right: 10px;
+  margin-left: -10px;
+}
+
+button {
+  padding: 5px 15px;
+}
+
+#overlay {
+  background-color: rgba(20, 20, 30, 0.9); /* Dark grey with slight transparency */
+  border: 2px solid #666; /* Slightly lighter grey border */
+  border-radius: 5px; /* Rounded corners */
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); /* Subtle shadow for depth */
+  width: 800px; /* Match room description width */
+  height: 130px; /* Match room description height */
+  position: absolute; /* Position over room description */
+  top: 0; /* Align with top of room description container */
+  left: 0;
+  z-index: 2; /* Above room description */
+  box-sizing: border-box; /* Ensure border/padding is included in width/height */
+}

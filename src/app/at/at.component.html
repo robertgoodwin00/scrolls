@@ -1,0 +1,44 @@
+<!-- at overlay, positioned absolutely over the room description -->
+<div id="overlay" #atContainer [style.display]="isOverlayVisible() ? 'block' : 'none'">
+  <!--
+    <div class="at-container" #atScrollContainer>  
+   <div *ngFor="let msg of currentHistory; let i = index"> 
+      <ng-container [ngSwitch]="msg.role">
+        <p *ngSwitchCase="'user'"><strong>You:</strong> {{ msg.content }}</p>
+        <p *ngSwitchCase="'assistant'"><strong>They:</strong> {{ msg.content }}</p>
+        <p *ngSwitchCase="'system'">
+          <span *ngIf="true"><em>System:</em> {{ msg.content }}</span>
+        </p>
+      </ng-container>
+      
+        
+    </div>
+  </div>
+-->
+  <div>
+    <ng-container>
+        <p class="bot-message"> {{ mostRecent }} </p>
+    </ng-container>
+  </div>
+  
+</div>
+
+<!-- Input and Send Button, always visible below -->
+<div class="input-container" style="width: 600px;">
+  <input 
+    type="text" 
+    [(ngModel)]="message" 
+    placeholder="Extra" 
+    (keyup.enter)="sendMessage()"
+  />
+  <button (click)="sendMessage()">Delete</button>
+</div>
+
+<!--
+<div>
+  <select [(ngModel)]="selectedApi" (ngModelChange)="changeApi($event)">
+    <option value="1">API 1 (Openrouter Mistral Nemo)</option>
+    <option value="2">API 2 (Openrouter meta-llama/llama-3.3-8b-instruct:free)</option>
+  </select>
+</div>
+-->

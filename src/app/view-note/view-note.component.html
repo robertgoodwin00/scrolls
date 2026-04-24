@@ -1,45 +1,60 @@
-
-
 <div *ngIf="note" style="margin: 20px; padding: 20px; border: 1px solid #ddd; border-radius: 5px; background-color: #fff;">
   <span style="font-style:italic; font-size:12px;">{{note.id}}</span>
   <br><br>
   
   <div style="display: flex; align-items: center; margin-bottom: 10px; font-family: 'Arial', sans-serif;">
     <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513; margin-right: 5px;">Title:</span>
-    <span [innerHTML]="safeTitle" style="font-weight:bold; font-size:larger;"></span>
+    <span [innerHTML]="safeTitle" class="title" style="font-weight:bold; font-size:larger;"></span>
   </div>
   <div style="display: flex; align-items: center; margin-bottom: 10px; font-family: 'Arial', sans-serif;">
-    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513; margin-right: 5px;">Authors:</span>
-    <span [innerHTML]="safeAuthor" ></span>
+    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513; margin-right: 5px;">Source:</span>
+    <span [innerHTML]="safeAuthor" class="author"></span>
   </div>
   <hr style="margin: 10px 0;">
   <div style="margin-bottom: 10px; font-family: 'Arial', sans-serif;">
     <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Type / Conditions:</span>
-    <span [innerHTML]="safePerforming"></span>
+    <span [innerHTML]="safePerforming" class="performing"></span>
   </div>
   <hr style="margin: 10px 0;">
   <div style="margin-bottom: 10px; font-family: 'Arial', sans-serif;">
     <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Props:</span>
-    <span [innerHTML]="safeProps"></span>
+    <span [innerHTML]="safeProps" class="props"></span>
   </div>
   <hr style="margin: 10px 0;">
   <div style="margin-bottom: 10px; font-family: 'Arial', sans-serif;">
     <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Setup:</span>
-    <span [innerHTML]="safeSetup"></span>
+    <span [innerHTML]="safeSetup" class="setup"></span>
   </div>
   <hr style="margin: 10px 0;">
   <div style="margin-bottom: 10px; font-family: 'Arial', sans-serif;">
     <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Working:</span>
-    <p [innerHTML]="safeContent"></p>
+    <p [innerHTML]="safeContent" class="content"></p>
   </div>
   <hr style="margin: 10px 0;">
   <div style="margin-bottom: 10px; font-family: 'Arial', sans-serif;">
     <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Notes:</span>
-    <span [innerHTML]="safeNotes"></span>
+    <span [innerHTML]="safeNotes" class="notes"></span>
   </div>
   <hr style="margin: 10px 0;">
   <p style="font-family: 'Arial', sans-serif;">
-    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Hashtags:</span>
+    <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">Tags:</span>
     <span *ngFor="let tag of note.hashtags">#{{tag}}</span>
   </p>
+  
+  <!-- Back References Section -->
+  <div *ngIf="backReferences.length > 0" style="margin-top: 20px; font-family: 'Arial', sans-serif;">
+    <hr style="margin: 10px 0;">
+    <p>
+      <span style="font-family: 'Georgia', serif; font-weight: bold; color: #8B4513;">References:</span>
+    </p>
+    <ul style="margin-left: 20px;">
+      <li *ngFor="let ref of backReferences" style="margin-bottom: 5px;">
+        <span style="color: blue; text-decoration: underline; cursor: pointer;" 
+              (click)="onNoteClick(ref.id!)">
+          {{ref.title || ref.id}}
+        </span>
+        <span style="font-size: 12px; color: #666; margin-left: 10px;">({{ref.id}})</span>
+      </li>
+    </ul>
+  </div>
 </div>

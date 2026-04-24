@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit, ViewChild, ElementRef, OnChanges, SimpleChanges, AfterViewInit } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnDestroy, ViewChild, ElementRef, OnChanges, SimpleChanges, AfterViewInit, HostListener } from '@angular/core';
 import { NoteService } from '../note.service';
 import { Note } from '../../models/note';
-import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
+import { SafeHtml } from '@angular/platform-browser';
 import { SanitizationService } from '../sanitization.service';
 
 @Component({
@@ -10,11 +10,11 @@ import { SanitizationService } from '../sanitization.service';
   templateUrl: './editor.component.html',
   styleUrls: ['./editor.component.css']
 })
-export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
+export class EditorComponent implements OnInit, OnChanges, OnDestroy, AfterViewInit {
   @Input() note!: Note;
   @Input() mode: 'create' | 'edit' = 'edit';
   @Input() category!: number;
-  @Input() initialTab: 'raw' | 'rendered' = 'raw'; // New input to control initial tab
+  @Input() initialTab: 'raw' | 'rendered' = 'raw';
   @Output() save = new EventEmitter<any>();
   @Output() cancel = new EventEmitter<void>();
   @Output() editNote = new EventEmitter<any>();
@@ -37,15 +37,24 @@ export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
   colors = ['black', 'red', 'blue', 'green', '#666600', 'purple', 'darkorange', 'gold', '#555', 'gray', '#006666', 'magenta', 'lime', 'navy', 'indigo', 'maroon'];
   fontSizes = [8, 10, 12, 14, 16, 18, 20, 24, 28, 32, 36, 40];
 
+  generalNotes: Note[] = [];
   sleightNotes: Note[] = [];
   trickNotes: Note[] = [];
   routineNotes: Note[] = [];
   actNotes: Note[] = [];
+  hashtagInput: string = '';
 
   private lastFocusedElement: HTMLTextAreaElement | HTMLInputElement | null = null;
   private noteService: NoteService;
   private elementFieldMap: Map<HTMLTextAreaElement | HTMLInputElement, { field: keyof Note, defaultValue: string }> = new Map();
-  private defaultFields: { element: HTMLTextAreaElement, field: keyof Note, value: string }[] = [];
+  private defaultFields: { element: HTMLTextAreaElement | HTMLInputElement, field: keyof Note, value: string }[] = [];
+
+  private focusListenerCleanups: (() => void)[] = [];
+
+  isCtrlPressed: boolean = false;
+  isShiftPressed: boolean = false;
+  isAtOn: boolean = false;
+  pressedButtonCount: number = 0;
 
   constructor(
     noteService: NoteService,
@@ -62,32 +71,51 @@ export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
       };
       this.activeTab = 'raw';
     } else {
-      this.activeTab = this.initialTab; // Use initialTab from MainComponent
+      this.activeTab = this.initialTab;
+      this.hashtagInput = this.note.hashtags?.join(', ') || '';
     }
     this.updateRenderedView();
 
+    // Load notes for dropdowns
+    this.loadNotesForDropdowns();
+  }
+
+   ngOnDestroy() {
+    // Clean up focus listeners
+    this.focusListenerCleanups.forEach(cleanup => cleanup());
+    this.focusListenerCleanups = [];
+    
+    // Clear references
+    this.elementFieldMap.clear();
+    this.defaultFields = [];
+    this.lastFocusedElement = null;
+  }
+
+  private loadNotesForDropdowns() {
     this.noteService.getAllNotes().subscribe(notes => {
+      this.generalNotes = notes.filter(note => note.category === 0);
       this.sleightNotes = notes.filter(note => note.category === 1);
       this.trickNotes = notes.filter(note => note.category === 2);
       this.routineNotes = notes.filter(note => note.category === 3);
       this.actNotes = notes.filter(note => note.category === 4);
     });
+  }
 
-    document.addEventListener('noteLinkClick', (event: any) => {
-      const noteId = event.detail;
-      this.noteService.getNote(noteId).subscribe(note => {
-        this.note = note;
-        this.activeTab = 'rendered'; // Fallback for direct clicks, though MainComponent should handle this
-        this.updateRenderedView();
-      });
-    });
+  resetDropdowns() {
+    this.generalNotes = [];
+    this.sleightNotes = [];
+    this.trickNotes = [];
+    this.routineNotes = [];
+    this.actNotes = [];
   }
 
   ngAfterViewInit() {
-    if (!this.contentTextarea || !this.performingTextarea || !this.propsTextarea || !this.setupTextarea || !this.notesTextarea || !this.titleInput || !this.authorInput) {
+    if (!this.contentTextarea || !this.performingTextarea || !this.propsTextarea || 
+        !this.setupTextarea || !this.notesTextarea || !this.titleInput || !this.authorInput) {
+      console.error('One or more ViewChild elements are undefined');
       return;
     }
-  
+
     const mappings: [HTMLTextAreaElement | HTMLInputElement, { field: keyof Note, defaultValue: string }][] = [
       [this.contentTextarea.nativeElement, { field: 'content', defaultValue: '' }],
       [this.performingTextarea.nativeElement, { field: 'performing', defaultValue: '' }],
@@ -97,13 +125,20 @@ export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
       [this.titleInput.nativeElement, { field: 'title', defaultValue: '' }],
       [this.authorInput.nativeElement, { field: 'author', defaultValue: '' }]
     ];
-  
+
     this.elementFieldMap = new Map(mappings);
-    this.defaultFields = [
-      { element: this.contentTextarea.nativeElement, field: 'content', value: '' },
-      { element: this.performingTextarea.nativeElement, field: 'performing', value: '' },
-      { element: this.propsTextarea.nativeElement, field: 'props', value: '' }
-    ];
+    this.defaultFields = mappings.map(([element, config]) => ({
+      element: element,
+      field: config.field,
+      value: config.defaultValue
+    }));
+
+    mappings.forEach(([element]) => {
+      const handler = () => { this.lastFocusedElement = element; };
+      element.addEventListener('focus', handler);
+      this.focusListenerCleanups.push(() => element.removeEventListener('focus', handler));
+    });
+
   }
 
   ngOnChanges(changes: SimpleChanges) {
@@ -111,7 +146,7 @@ export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
       this.note.category = this.category;
     }
     if (changes['note'] && this.note) {
-      this.activeTab = this.initialTab; // Use initialTab when note changes
+      this.activeTab = this.initialTab;
       this.updateRenderedView();
     }
   }
@@ -143,6 +178,7 @@ export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
 
     selectElement.selectedIndex = 0;
   }
+  
 
   toggleEdit(note: any) {
     note.isEditing = !note.isEditing;
@@ -152,20 +188,15 @@ export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
     }
   }
 
-  private getActiveElement(): HTMLTextAreaElement | HTMLInputElement | null {
-    return this.lastFocusedElement;
-  }
-
   private getActiveFieldInfo(defaultField?: keyof Note): {
     element: HTMLTextAreaElement | HTMLInputElement,
     field: keyof Note,
     currentValue: string
   } {
-    const activeElement = this.getActiveElement();
-    if (activeElement && this.elementFieldMap.has(activeElement)) {
-      const config = this.elementFieldMap.get(activeElement)!;
+    if (this.lastFocusedElement && this.elementFieldMap.has(this.lastFocusedElement)) {
+      const config = this.elementFieldMap.get(this.lastFocusedElement)!;
       return {
-        element: activeElement,
+        element: this.lastFocusedElement,
         field: config.field,
         currentValue: this.note[config.field] as string
       };
@@ -192,29 +223,79 @@ export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
     this.activeTab = tab;
     if (tab === 'rendered') {
       this.updateRenderedView();
+    } else {
+      // When switching back to raw tab, refresh element references and set default focus
+      setTimeout(() => {
+        this.refreshElementReferences();
+        this.setDefaultFocus();
+      }, 0);
+    }
+  }
+
+
+  private refreshElementReferences() {
+    if (!this.contentTextarea || !this.performingTextarea || !this.propsTextarea || 
+        !this.setupTextarea || !this.notesTextarea || !this.titleInput || !this.authorInput) {
+      return;
+    }
+
+    // Remove old event listeners before adding new ones
+    this.focusListenerCleanups.forEach(cleanup => cleanup());
+    this.focusListenerCleanups = [];
+
+    const mappings: [HTMLTextAreaElement | HTMLInputElement, { field: keyof Note, defaultValue: string }][] = [
+      [this.contentTextarea.nativeElement, { field: 'content', defaultValue: '' }],
+      [this.performingTextarea.nativeElement, { field: 'performing', defaultValue: '' }],
+      [this.propsTextarea.nativeElement, { field: 'props', defaultValue: '' }],
+      [this.setupTextarea.nativeElement, { field: 'setup', defaultValue: '' }],
+      [this.notesTextarea.nativeElement, { field: 'notes', defaultValue: '' }],
+      [this.titleInput.nativeElement, { field: 'title', defaultValue: '' }],
+      [this.authorInput.nativeElement, { field: 'author', defaultValue: '' }]
+    ];
+
+    this.elementFieldMap = new Map(mappings);
+    this.defaultFields = mappings.map(([element, config]) => ({
+      element: element,
+      field: config.field,
+      value: config.defaultValue
+    }));
+
+    // Add event listeners and track them for cleanup
+    mappings.forEach(([element]) => {
+      const handler = () => { this.lastFocusedElement = element; };
+      element.addEventListener('focus', handler);
+      this.focusListenerCleanups.push(() => element.removeEventListener('focus', handler));
+    });
+  }
+
+  // set a default focus element:
+  private setDefaultFocus() {
+    if (this.contentTextarea && this.contentTextarea.nativeElement) {
+      this.lastFocusedElement = this.contentTextarea.nativeElement;
     }
   }
 
   private async updateRenderedView() {
     if (!this.note) return;
-    this.safeTitle = await this.sanitizationService.sanitizeContent(this.note.title ?? '');
-    this.safeAuthor = await this.sanitizationService.sanitizeContent(this.note.author ?? '');
-    this.safeContent = await this.sanitizationService.sanitizeContent(this.note.content ?? '');
-    this.safePerforming = await this.sanitizationService.sanitizeContent(this.note.performing ?? '');
-    this.safeProps = await this.sanitizationService.sanitizeContent(this.note.props ?? '');
-    this.safeSetup = await this.sanitizationService.sanitizeContent(this.note.setup ?? '');
-    this.safeNotes = await this.sanitizationService.sanitizeContent(this.note.notes ?? '');
+    const sanitized = await this.sanitizationService.sanitizeNote(this.note);
+    this.safeTitle = sanitized['safeTitle'];
+    this.safeAuthor = sanitized['safeAuthor'];
+    this.safeContent = sanitized['safeContent'];
+    this.safePerforming = sanitized['safePerforming'];
+    this.safeProps = sanitized['safeProps'];
+    this.safeSetup = sanitized['safeSetup'];
+    this.safeNotes = sanitized['safeNotes'];
   }
 
   formatText(format: 'bold' | 'italic' | 'underline' | string) {
     if (this.activeTab === 'rendered') return;
-
+  
     const { element, field, currentValue } = this.getActiveFieldInfo();
     const start = element.selectionStart ?? 0;
     const end = element.selectionEnd ?? 0;
     const selectedText = currentValue.substring(start, end);
     let openingTag: string, closingTag: string;
-
+  
     if (this.colors.includes(format)) {
       openingTag = `<span style="color: ${format}">`;
       closingTag = `</span>`;
@@ -224,9 +305,9 @@ export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
     } else {
       const tag = format === 'bold' ? 'b' : format === 'italic' ? 'i' : 'u';
       openingTag = `<${tag}>`;
-      closingTag = `</ ${tag}>`;
+      closingTag = `</${tag}>`;
     }
-
+  
     if (start === end) {
       const text = `${openingTag}${closingTag}`;
       this.insertTextAtCursor(element, text, field, currentValue);
@@ -272,50 +353,107 @@ export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
 
   insertTrumpSuit(suit: 'spade' | 'club' | 'heart' | 'diamond') {
     if (this.activeTab === 'rendered') return;
+    this.otherPressed();
     this.insertTag(`<${suit}>`);
   }
 
   insertSymbol(symbol: string) {
     if (this.activeTab === 'rendered') return;
+    this.otherPressed();
     this.insertTag(`<${symbol}>`);
   }
 
   insertPerformingSymbol(symbol: string) {
     if (this.activeTab === 'rendered') return;
+    this.otherPressed();
     this.insertTag(`<${symbol}>`, 'performing');
   }
   
   insertPropsSymbol(symbol: string) {
     if (this.activeTab === 'rendered') return;
+    if (symbol == 'pen')
+      this.penPressed();
+    else if (symbol == 'coins')
+      this.coinPressed();
+    else
+      this.otherPressed();
     this.insertTag(`<${symbol}>`, 'props');
   }
 
+  penPressed() {
+    this.pressedButtonCount += 1;
+    if (this.pressedButtonCount >= 3)
+    {
+      this.isAtOn = true;
+      this.isCtrlPressed = false;
+    }  
+  }
+
+  coinPressed() {
+    if (this.isAtOn)
+    this.isCtrlPressed = !this.isCtrlPressed;
+  }
+
+  otherPressed() {
+    if (this.pressedButtonCount >= 3 || this.isAtOn)
+    {
+      this.isAtOn = false;
+    }
+      
+    this.pressedButtonCount = 0;
+  }
+
+  
   saveNote() {
     if (!this.note) return;
   
-    if (this.note.hashtags && typeof this.note.hashtags === 'string') {
-      this.note.hashtags = (this.note.hashtags as string)
-        .split(',')
-        .map(tag => tag.trim())
-        .filter(tag => tag.length > 0);
-    } else if (!Array.isArray(this.note.hashtags)) {
-      this.note.hashtags = [];
+    // Basic validation
+    const hasContent = this.note.title?.trim() || this.note.content?.trim();
+    if (!hasContent) {
+      alert('Please provide at least a title or content before saving.');
+      return;
     }
-  
-    const saveOperation = this.mode === 'create'
-      ? this.noteService.createNote(this.note)
-      : this.noteService.updateNote(this.note);
-  
-    saveOperation.subscribe((savedNote: Note) => {
-      this.save.emit({ ...savedNote, isDisplayed: true, isEditing: false });
-      if (this.mode === 'create') this.resetNote();
-    });
+
+    this.convertHashtagsToArray(this.hashtagInput);
+
+    if (this.mode === 'create') {
+        if (this.note.category === undefined || this.note.category === null) {
+            this.note.category = this.category;
+        }
+
+        this.save.emit(this.note);
+        this.resetNote();
+
+    } else {
+        const saveOperation = this.noteService.updateNote(this.note);
+          saveOperation.subscribe({
+              next: () => {
+                  this.save.emit({ ...this.note, isDisplayed: true, isEditing: false });
+              },
+              error: (err) => {
+                  console.error('Error updating note:', err);
+                  alert('Failed to save note changes. Please try again.');
+              }
+          });
+    }
   }
 
+  /* old. allows non-alphanumeric
   convertHashtagsToArray(value: string) {
-    this.note.hashtags = value.split(',')
+    this.hashtagInput = value;
+    this.note.hashtags = value
+      .split(',')
       .map(tag => tag.trim())
       .filter(tag => tag.length > 0);
+  }
+      */
+
+  convertHashtagsToArray(value: string) {
+    this.hashtagInput = value;
+    this.note.hashtags = value
+      .split(',')
+      .map(tag => tag.trim().toLowerCase()) // normalize to lowercase
+      .filter(tag => tag.length > 0 && /^[a-z0-9-_]+$/i.test(tag)); // alphanumeric only
   }
 
   cancelEdit() {
@@ -329,50 +467,31 @@ export class EditorComponent implements OnInit, OnChanges, AfterViewInit {
         title: '', author: '', content: '', hashtags: [], category: this.category,
         performing: '', props: '', setup: '', notes: ''
       };
+      this.hashtagInput = '';
     }
   }
-}
-/*
-  private sanitizeContent(content: string): string {
-    // Simple tag balancing: ensure each opening tag has a matching closing tag
-    const tags = ['b', 'i', 'u', 'span'];
-    tags.forEach(tag => {
-      const opening = tag === 'span' ? `<span style="color:` : `<${tag}>`;
-      const closing = tag === 'span' ? `</span>` : `</ ${tag}>`;
-      const openingCount = (content.match(new RegExp(opening, 'g')) || []).length;
-      const closingCount = (content.match(new RegExp(closing, 'g')) || []).length;
-  
-      if (openingCount > closingCount) {
-        // Add missing closing tags without whitespace
-        for (let i = 0; i < openingCount - closingCount; i++) {
-          content += closing;
-        }
-      } else if (closingCount > openingCount) {
-        // Remove extra closing tags
-        for (let i = 0; i < closingCount - openingCount; i++) {
-          content = content.replace(closing, '');
-        }
-      }
-  
-      // Remove any whitespace within closing tags
-      content = content.replace(/<\/\s*(\w+)\s*>/g, '</ $1>');
-    });
-    return content;
+
+  // Listen for keydown events
+  @HostListener('document:keydown', ['$event'])
+  handleKeyDown(event: KeyboardEvent) {
+    if (event.key === 'Control') this.isCtrlPressed = true;
+    if (event.key === 'Shift') this.isShiftPressed = true;
   }
-  */
+
+  // Listen for keyup events
+  @HostListener('document:keyup', ['$event'])
+  handleKeyUp(event: KeyboardEvent) {
+    if (event.key === 'Control') this.isCtrlPressed = false;
+    if (event.key === 'Shift') this.isShiftPressed = false;
+    if (event.key === 'F8') this.isAtOn = !this.isAtOn;
+  }
+
+  onNavigateToNote(noteId: string) {
+    // Load and display the referenced note
+    this.noteService.getNote(noteId).subscribe(note => {
+      this.note = note;
+    });
+  }
 
 
-
-
-// TODO
-
-// also need confirmation when deleting notes
-
-// carriage returns
-
-// launching edit/view from note-list broken
-
-
-
-// also make cross-referencing of notes 
-
+}

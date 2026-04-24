@@ -1,6 +1,11 @@
-<button (click)="toggleVisibility()">{{ isVisible ? 'Hide' : 'Create New' }}</button>
+<div style="display:inline-block;">
+  <span style="font-size:20px; font-weight:bold;">Create New {{ getCategoryName(category) }}</span>
+  &nbsp;
+  <button (click)="toggleVisibility()">{{ isVisible ? 'Hide' : 'Create New' }}</button>
+</div>
+
 <div *ngIf="isVisible">
-  <h2>Create New {{ getCategoryName(category) }}</h2>
+  
   <app-editor
     [mode]="'create'"
     [category]="category"
@@ -9,3 +14,6 @@
   </app-editor>
 </div>
 <br>
+
+
+
