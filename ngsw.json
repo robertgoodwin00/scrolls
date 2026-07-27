@@ -1,0 +1,97 @@
+{
+  "configVersion": 1,
+  "timestamp": 1785150848349,
+  "index": "https://robertgoodwin00.github.io/scrolls/index.html",
+  "assetGroups": [
+    {
+      "name": "app",
+      "installMode": "prefetch",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "https://robertgoodwin00.github.io/scrolls/favicon.ico",
+        "https://robertgoodwin00.github.io/scrolls/index.html",
+        "https://robertgoodwin00.github.io/scrolls/main.d7bd294bad556180.js",
+        "https://robertgoodwin00.github.io/scrolls/manifest.webmanifest",
+        "https://robertgoodwin00.github.io/scrolls/polyfills.eb382c0590125b3f.js",
+        "https://robertgoodwin00.github.io/scrolls/runtime.c3f2d24ac5ad8d64.js",
+        "https://robertgoodwin00.github.io/scrolls/styles.087f64127abf7a61.css"
+      ],
+      "patterns": []
+    },
+    {
+      "name": "assets",
+      "installMode": "lazy",
+      "updateMode": "prefetch",
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "urls": [
+        "https://robertgoodwin00.github.io/scrolls/icons/icon-maskable.svg",
+        "https://robertgoodwin00.github.io/scrolls/icons/icon.svg"
+      ],
+      "patterns": []
+    }
+  ],
+  "dataGroups": [
+    {
+      "name": "google-fonts-stylesheets",
+      "patterns": [
+        "https:\\/\\/fonts\\.googleapis\\.com\\/.*"
+      ],
+      "strategy": "freshness",
+      "maxSize": 10,
+      "maxAge": 604800000,
+      "timeoutMs": 10000,
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "version": 1
+    },
+    {
+      "name": "google-fonts-webfonts",
+      "patterns": [
+        "https:\\/\\/fonts\\.gstatic\\.com\\/.*"
+      ],
+      "strategy": "performance",
+      "maxSize": 50,
+      "maxAge": 31536000000,
+      "cacheQueryOptions": {
+        "ignoreVary": true
+      },
+      "version": 1
+    }
+  ],
+  "hashTable": {
+    "https://robertgoodwin00.github.io/scrolls/favicon.ico": "9c39f434fe1261f68c5e3eefdf734630d99c5670",
+    "https://robertgoodwin00.github.io/scrolls/icons/icon-maskable.svg": "ccf766a37108f4b335523f76b0fa2ba9f5d520c8",
+    "https://robertgoodwin00.github.io/scrolls/icons/icon.svg": "8be1286a476d83b0b50118f2a551a793ba7d2cea",
+    "https://robertgoodwin00.github.io/scrolls/index.html": "8002d026f60517c6e97503b19d193abda3b2c548",
+    "https://robertgoodwin00.github.io/scrolls/main.d7bd294bad556180.js": "061aa3f481fb7b25c25b88698f957df9d38568bd",
+    "https://robertgoodwin00.github.io/scrolls/manifest.webmanifest": "00f71f5a5a8f20aeb3a3f7d8ea91cca5bb42a75c",
+    "https://robertgoodwin00.github.io/scrolls/polyfills.eb382c0590125b3f.js": "542540cccbb48a8dbdb2f828848a7608dd8426e1",
+    "https://robertgoodwin00.github.io/scrolls/runtime.c3f2d24ac5ad8d64.js": "1779e098f5ac7003cd23289ae9174707f9366ca9",
+    "https://robertgoodwin00.github.io/scrolls/styles.087f64127abf7a61.css": "da6d48cc385ef7b6afaae14d6230da2e89a5072c"
+  },
+  "navigationUrls": [
+    {
+      "positive": true,
+      "regex": "^\\/.*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*\\.[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*$"
+    },
+    {
+      "positive": false,
+      "regex": "^\\/(?:.+\\/)?[^/]*__[^/]*\\/.*$"
+    }
+  ],
+  "navigationRequestStrategy": "performance"
+}
