@@ -1,6 +1,6 @@
 {
   "configVersion": 1,
-  "timestamp": 1785195399466,
+  "timestamp": 1785197117375,
   "index": "https://robertgoodwin00.github.io/scrolls/index.html",
   "assetGroups": [
     {
@@ -70,7 +70,7 @@
     "https://robertgoodwin00.github.io/scrolls/icons/icon.svg": "8be1286a476d83b0b50118f2a551a793ba7d2cea",
     "https://robertgoodwin00.github.io/scrolls/index.html": "fe668fa1be54b5563830d2683ee2974c15ed72f3",
     "https://robertgoodwin00.github.io/scrolls/main.57844dbabd14f450.js": "6f7155451cd6388ec4f9283f21d6bd43b0468c8a",
-    "https://robertgoodwin00.github.io/scrolls/manifest.webmanifest": "00f71f5a5a8f20aeb3a3f7d8ea91cca5bb42a75c",
+    "https://robertgoodwin00.github.io/scrolls/manifest.webmanifest": "0e44345b596a03fce4c14778993ded4f7603e64b",
     "https://robertgoodwin00.github.io/scrolls/polyfills.eb382c0590125b3f.js": "542540cccbb48a8dbdb2f828848a7608dd8426e1",
     "https://robertgoodwin00.github.io/scrolls/runtime.c3f2d24ac5ad8d64.js": "1779e098f5ac7003cd23289ae9174707f9366ca9",
     "https://robertgoodwin00.github.io/scrolls/styles.087f64127abf7a61.css": "da6d48cc385ef7b6afaae14d6230da2e89a5072c"
